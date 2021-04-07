@@ -8,7 +8,7 @@ Base = declarative_base()
 class Ownership(Base):
     __tablename__ = 'ownership'
     id = Column(INTEGER, primary_key=True)
-    owner = Column(VARCHAR(2), nullable=False)
+    owner = Column(VARCHAR(2), nullable=False, unique=True)
     records = relationship('TZ_data', backref='owner', lazy='dynamic')
 
     def __repr__(self):
@@ -18,7 +18,7 @@ class Ownership(Base):
 class Koatu(Base):
     __tablename__ = 'koatu'
     id = Column(INTEGER, primary_key=True)
-    code = Column(VARCHAR(10), nullable=False)
+    code = Column(VARCHAR(10), nullable=False, unique=True)
     records = relationship('TZ_data', backref='koatu', lazy='dynamic')
 
     def __repr__(self):
@@ -50,7 +50,7 @@ class Departments(Base):
 class Brands(Base):
     __tablename__ = 'brands'
     id = Column(INTEGER, primary_key=True)
-    brand = Column(VARCHAR(64), nullable=False)
+    brand = Column(VARCHAR(64), nullable=False, unique=True)
     vehicles = relationship('Vehicles', backref='brand', lazy='dynamic')
 
     def __repr__(self):
@@ -60,7 +60,7 @@ class Brands(Base):
 class Models(Base):
     __tablename__ = 'models'
     id = Column(INTEGER, primary_key=True)
-    model = Column(VARCHAR(64), nullable=False)
+    model = Column(VARCHAR(64), nullable=False, unique=True)
     vehicles = relationship('Vehicles', backref='model', lazy='dynamic')
 
     def __repr__(self):
@@ -70,7 +70,7 @@ class Models(Base):
 class Colors(Base):
     __tablename__ = 'colors'
     id = Column(INTEGER, primary_key=True)
-    color = Column(VARCHAR(20), nullable=False)
+    color = Column(VARCHAR(20), nullable=False, unique=True)
     vehicles = relationship('Vehicles', backref='colors', lazy='dynamic')
 
     def __repr__(self):
@@ -80,7 +80,7 @@ class Colors(Base):
 class Kinds(Base):
     __tablename__ = 'kinds'
     id = Column(INTEGER, primary_key=True)
-    kind = Column(VARCHAR(20), nullable=False)
+    kind = Column(VARCHAR(20), nullable=False, unique=True)
     vehicles = relationship('Vehicles', backref='kinds', lazy='dynamic')
 
     def __repr__(self):
@@ -90,7 +90,7 @@ class Kinds(Base):
 class Body(Base):
     __tablename__ = 'body'
     id = Column(INTEGER, primary_key=True)
-    body = Column(VARCHAR(30), nullable=False)
+    body = Column(VARCHAR(30), nullable=False, unique=True)
     vehicles = relationship('Vehicles', backref='body', lazy='dynamic')
 
 
@@ -101,7 +101,7 @@ class Body(Base):
 class Purpose(Base):
     __tablename__ = 'purpose'
     id = Column(INTEGER, primary_key=True)
-    purpose = Column(VARCHAR(20), nullable=False)
+    purpose = Column(VARCHAR(20), nullable=False, unique=True)
     vehicles = relationship('Vehicles', backref='purpose', lazy='dynamic')
 
     def __repr__(self):
@@ -111,7 +111,7 @@ class Purpose(Base):
 class Fuel(Base):
     __tablename__ = 'fuel'
     id = Column(INTEGER, primary_key=True)
-    fuel = Column(VARCHAR(20), nullable=False)
+    fuel = Column(VARCHAR(20), nullable=False, unique=True)
     vehicles = relationship('Vehicles', backref='fuel', lazy='dynamic')
 
     def __repr__(self):
@@ -121,7 +121,7 @@ class Fuel(Base):
 class Plates(Base):
     __tablename__ = 'plates'
     id = Column(INTEGER, primary_key=True)
-    plate = Column(VARCHAR(10), nullable=False)
+    plate = Column(VARCHAR(10), nullable=False, unique=True)
     vehicles = relationship('Vehicles', backref='plate', lazy='dynamic')
 
     def __repr__(self):
@@ -143,7 +143,7 @@ class Vehicles(Base):
     capacity = Column(INTEGER)
     own_weight = Column(INTEGER, nullable=False)
     total_weight = Column(INTEGER, nullable=False)
-    combination = Column(VARCHAR(10), unique=True, nullable=False)
+    # combination = Column(VARCHAR(10), unique=True, nullable=False)
 
     def __repr__(self):
         return '<Vehicle {}>'.format(self.combination)
@@ -156,7 +156,7 @@ class  TZ_data(Base):
     koatu_id = Column(INTEGER, ForeignKey('koatu.id'))
     operation_id = Column(INTEGER, ForeignKey('operations.id'), nullable=False)
     department_id = Column(INTEGER, ForeignKey('departments.id'), nullable=False)
-    data = Column(DATE, nullable=False)
+    date = Column(DATE, nullable=False)
     vehicle_id = Column(INTEGER, ForeignKey('vehicles.id'))
 
 
