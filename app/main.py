@@ -1,34 +1,9 @@
-import os
-import time
-from datetime import datetime
-from zipfile import ZipFile
-
-from tqdm import tqdm
-
-from app import engine, db, files
-from app.utils import download, unzip, get_lines_count
-from model import Base, Colors, Ownership, Koatu, Operations, Departments, Brands, Models, Kinds, Body, Purpose, Fuel, \
-    Plates, Vehicles, TZ_data
-
-OWN = 0
-KOATU = 1
-OPER_CODE = 2
-OPER_NAME = 3
-DATE = 4
-DEP_CODE = 5
-DEP = 6
-BRAND = 7
-MODEL = 8
-YEAR = 9
-COLOR = 10
-KIND = 11
-BODY = 12
-PURPOSE = 13
-FUEL = 14
-CAPACITY = 15
-OWN_WEIGHT = 16
-TOTAL_WEIGHT = 17
-PLATE = 18
+from app import engine, db
+from app.line import Line
+from app.utils import get_lines_count
+from app.model import Base, Colors, Ownership, Koatu, Operations, Departments, Brands, Models, Kinds, Body, Purpose, \
+    Fuel, \
+    Plates, Vehicles, TZ_data, DictSearch
 
 
 def main():
@@ -61,92 +36,87 @@ def fill_db(file_path):
 
     # Using for loop
     print("Using for loop")
-    for line in csv_file:
+    own = DictSearch()
+    koatu = DictSearch()
+    oper = DictSearch()
+    dpt = DictSearch()
+    brand = DictSearch()
+    model = DictSearch()
+    color = DictSearch()
+    kind = DictSearch()
+    body = DictSearch()
+    purpose = DictSearch()
+    fuel = DictSearch()
+    plate = DictSearch()
+    vehicle =DictSearch()
+    record = DictSearch()
+
+    for row in csv_file:
         count += 1
         if count == 1:
             continue
-        row = line.split(';')
-        row_owner = row[OWN].strip('"')
-        row_koatu = row[KOATU].strip('"')
-        row_oper_code = row[OPER_CODE].strip('"')
-        row_oper_name = row[OPER_NAME].strip('"')
-        row_date = datetime.strptime(row[DATE].strip('"'), "%Y-%m-%d").date()
-        row_dep_code = row[DEP_CODE].strip('"')
-        row_dep = row[DEP].strip('"')
-        row_brand = row[BRAND].strip('"')
-        row_model = row[MODEL].strip('"')
-        row_year = row[YEAR].strip('"')
-        row_color = row[COLOR].strip('"')
-        row_kind = row[KIND].strip('"')
-        row_body = row[BODY].strip('"')
-        row_purpose = row[PURPOSE].strip('"')
-        row_fuel = row[FUEL].strip('"')
-        row_capacity = row[CAPACITY].strip('"')
-        row_own_weight = row[OWN_WEIGHT].strip('"')
-        row_total_weight = row[TOTAL_WEIGHT].strip('"')
-        row_plate = row[PLATE].strip('"')
+        data = Line(row)
 
-        owner = db.query(Ownership).filter_by(owner=row_owner).first()
-        if not owner:
-            owner = Ownership(owner=row_owner)
-            db.add(owner)
-        koatu = db.query(Koatu).filter_by(code=row_koatu).first()
-        if not koatu:
-            koatu = Koatu(code=row_koatu)
-            db.add(koatu)
-        operation = db.query(Operations).filter_by(oper_code=row_oper_code).filter_by(oper_name=row_oper_name).first()
-        if not operation:
-            operation = Operations(oper_code=row_oper_code, oper_name=row_oper_name)
-            db.add(operation)
-        department = db.query(Departments).filter_by(dep_code=row_dep_code).filter_by(dep=row_dep).first()
-        if not department:
-            department = Departments(dep_code=row_dep_code, dep=row_dep)
-            db.add(department)
-        brand = db.query(Brands).filter_by(brand=row_brand).first()
-        if not brand:
-            brand = Brands(brand=row_brand)
-            db.add(brand)
-        model = db.query(Models).filter_by(model=row_model).first()
-        if not model:
-            model = Models(model=row_model)
-            db.add(model)
-        color = db.query(Colors).filter_by(color=row_color).first()
-        if not color:
-            color = Colors(color=row_color)
-            db.add(color)
-        kind = db.query(Kinds).filter_by(kind=row_kind).first()
-        if not kind:
-            kind = Kinds(kind=row_kind)
-            db.add(kind)
-        body = db.query(Body).filter_by(body=row_body).first()
-        if not body:
-            body = Body(body=row_body)
-            db.add(body)
-        purpose = db.query(Purpose).filter_by(purpose=row_purpose).first()
-        if not purpose:
-            purpose = Purpose(purpose=row_purpose)
-            db.add(purpose)
-        fuel = db.query(Fuel).filter_by(fuel=row_fuel).first()
-        if not fuel:
-            fuel = Fuel(fuel=row_fuel)
-            db.add(fuel)
-        plate = db.query(Plates).filter_by(plate=row_plate).first()
-        if not plate:
-            plate = Plates(plate=row_plate)
-            db.add(plate)
-        db.flush()
-        vehicle = Vehicles(brand_id=brand.id, model_id=model.id, color_id=color.id, kind_id=kind.id, body_id=body.id,
-                           purpose_id=purpose.id, fuel_id=fuel.id, plate_id=plate.id, year=row_year, capacity=row_capacity,
-                           own_weight=row_own_weight, total_weight=row_total_weight)
-        db.add(vehicle)
-        db.flush()
-        record = TZ_data(owner_id=owner.id, koatu_id=koatu.id, operation_id=operation.id, department_id=department.id,
-                         date=row_date, vehicle_id=vehicle.id)
-        db.add(record)
-        db.commit()
+        own = own.get_id(data.owner)
+        koatu = koatu.get_id(data.koatu)
+        oper = oper.get_id(data.oper[0])
+        dpt = dpt.get_id(data.dep[0])
+        brand = brand.get_id(data.brand)
+        model = model.get_id((abs(brand.id), data.model))
+        color = color.get_id(data.color)
+        kind = kind.get_id(data.kind)
+        body = body.get_id(data.body)
+        purpose = purpose.get_id(data.purpose)
+        fuel = fuel.get_id(data.fuel)
+        plate = plate.get_id(data.plate)
+        vehicle = vehicle.get_id(
+            (abs(brand.id), abs(model.id), abs(color.id), abs(kind.id), abs(body.id), abs(purpose.id),
+             abs(fuel.id), abs(plate.id), data.year, data.capacity, data.own_weight, data.total_weight))
+
+        # if own.id < 0:
+        #     db.add(Ownership(id=abs(own.id), owner=data.owner))
+        # if koatu.id < 0:
+        #     db.add(Koatu(id=abs(koatu.id), code=data.koatu))
+        # if oper.id < 0:
+        #     db.add(Operations(id=abs(oper.id), oper_code=data.oper[0], oper_name=data.oper[1]))
+        # if dpt.id < 0:
+        #     db.add(Departments(id=abs(dpt.id), dep_code=data.dep[0], dep=data.dep[1]))
+        # if brand.id < 0:
+        #     db.add(Brands(id=abs(brand.id), brand=data.brand))
+        # if model.id < 0:
+        #     db.add(Models(id=abs(model.id), brand_id=abs(brand.id), model=data.model))
+        # if color.id < 0:
+        #     db.add(Colors(id=abs(color.id), color=data.color))
+        # if kind.id < 0:
+        #     db.add(Kinds(id=abs(kind.id), kind=data.kind))
+        # if body.id < 0:
+        #     db.add(Body(id=abs(body.id), body=data.body))
+        # if purpose.id < 0:
+        #     db.add(Purpose(id=abs(purpose.id), purpose=data.purpose))
+        # if fuel.id < 0:
+        #     db.add(Fuel(id=abs(fuel.id), fuel=data.fuel))
+        # if plate.id < 0:
+        #     db.add(Plates(id=abs(plate.id), plate=data.plate))
+        # if vehicle.id < 0:
+        #     db.add(Vehicles(id=abs(vehicle.id), brand_id=abs(brand.id), model_id=abs(model.id), color_id=abs(color.id), kind_id=abs(kind.id), body_id=abs(body.id),
+        #                    purpose_id=abs(purpose.id), fuel_id=abs(fuel.id), plate_id=abs(plate.id), year=data.year, capacity=data.capacity,
+        #                    own_weight=data.own_weight, total_weight=data.total_weight))
+        #
+        # db.add(TZ_data(owner_id=abs(own.id), koatu_id=abs(koatu.id), operation_id=abs(oper.id), department_id=abs(dpt.id),
+        #                  date=data.date))
 
 
-        print(count)
+
+        # record = TZ_data(owner_id=abs(own.id), koatu_id=abs(koatu.id), operation_id=abs(oper.id), department_id=abs(dpt.id),
+        #                  date=data.date)
+        # db.add(record)
+        if count%100 == 0:
+            print(count)
+            db.commit()
+
+
+
+
         # print("Line{}: {}".format(count, line.strip()))
 
     # Closing files

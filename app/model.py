@@ -1,10 +1,45 @@
-from sqlalchemy import Column, INTEGER, VARCHAR, ForeignKey, DATE
+from sqlalchemy import Column, INTEGER, VARCHAR, ForeignKey, DATE, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+
+from app import db
 
 Base = declarative_base()
 
 
+class DictSearch:
+    def __init__(self):
+        self.data = {}
+        self.inc = 0
+        self.id = 0
+        self.value = 0
+
+    def add(self, key):
+        # last = self.__get_last()
+        # if last:
+        #     id = self.data.get(last)
+        # else:
+        #     id = 0
+        self.inc = self.inc + 1
+        self.data[key] = self.inc
+        return self.inc
+
+    def __get_last(self):
+        if len(list(self.data)) > 0:
+            return list(self.data)[-1]
+        else:
+            return None
+
+    def get_id(self, key):
+        val = self.data.get(key)
+        if val:
+            self.value = key
+            self.id = int(val)
+        else:
+            self.id = -(self.add(key))
+        return self
+
+# version2: declarative
 class Ownership(Base):
     __tablename__ = 'ownership'
     id = Column(INTEGER, primary_key=True)
@@ -28,7 +63,7 @@ class Koatu(Base):
 class Operations(Base):
     __tablename__ = 'operations'
     id = Column(INTEGER, primary_key=True)
-    oper_code = Column(INTEGER, nullable=False)
+    oper_code = Column(INTEGER, nullable=False, unique=True)
     oper_name =Column(VARCHAR(128), nullable=False)
     records = relationship('TZ_data', backref='operation', lazy='dynamic')
 
@@ -39,8 +74,8 @@ class Operations(Base):
 class Departments(Base):
     __tablename__ = 'departments'
     id = Column(INTEGER, primary_key=True)
-    dep_code = Column(INTEGER, nullable=False)
-    dep = Column(VARCHAR(64), nullable=False)
+    dep_code = Column(INTEGER, nullable=False, unique=True)
+    dep = Column(VARCHAR(200), nullable=False)
     records = relationship('TZ_data', backref='department', lazy='dynamic')
 
     def __repr__(self):
@@ -52,6 +87,7 @@ class Brands(Base):
     id = Column(INTEGER, primary_key=True)
     brand = Column(VARCHAR(64), nullable=False, unique=True)
     vehicles = relationship('Vehicles', backref='brand', lazy='dynamic')
+    models = relationship('Models', backref='brand', lazy='dynamic')
 
     def __repr__(self):
         return '<Brand {}>'.format(self.brand)
@@ -60,8 +96,10 @@ class Brands(Base):
 class Models(Base):
     __tablename__ = 'models'
     id = Column(INTEGER, primary_key=True)
-    model = Column(VARCHAR(64), nullable=False, unique=True)
+    brand_id = Column(INTEGER, ForeignKey('brands.id'), nullable=False)
+    model = Column(VARCHAR(64), nullable=False)
     vehicles = relationship('Vehicles', backref='model', lazy='dynamic')
+    __table_args__ = (UniqueConstraint('brand_id', 'model', name='_model_uc'),)
 
     def __repr__(self):
         return '<Model {}>'.format(self.model)
@@ -90,9 +128,8 @@ class Kinds(Base):
 class Body(Base):
     __tablename__ = 'body'
     id = Column(INTEGER, primary_key=True)
-    body = Column(VARCHAR(30), nullable=False, unique=True)
+    body = Column(VARCHAR(40), nullable=False, unique=True)
     vehicles = relationship('Vehicles', backref='body', lazy='dynamic')
-
 
     def __repr__(self):
         return '<Body {}>'.format(self.body)
@@ -127,7 +164,6 @@ class Plates(Base):
     def __repr__(self):
         return '<Plates {}>'.format(self.plate)
 
-
 class Vehicles(Base):
     __tablename__ = 'vehicles'
     id = Column(INTEGER, primary_key=True)
@@ -157,7 +193,7 @@ class  TZ_data(Base):
     operation_id = Column(INTEGER, ForeignKey('operations.id'), nullable=False)
     department_id = Column(INTEGER, ForeignKey('departments.id'), nullable=False)
     date = Column(DATE, nullable=False)
-    vehicle_id = Column(INTEGER, ForeignKey('vehicles.id'))
+    # vehicle_id = Column(INTEGER, ForeignKey('vehicles.id'))
 
 
 
