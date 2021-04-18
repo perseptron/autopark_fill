@@ -3,7 +3,8 @@ import MySQLdb
 from app import engine, db, cursor, connection
 from app.line import Line
 from app.utils import get_lines_count
-from app.model import Base, DictSearch
+from app.model import Base, DictSearch, Ownership, Koatu, Operations, Departments, Brands, Models, Colors, Kinds, Body, \
+    Purpose, Fuel, Plates, Vehicles
 
 
 def main():
@@ -37,19 +38,19 @@ def fill_db(file_path):
 
     # Using for loop
     print("Using for loop")
-    own = DictSearch()
-    koatu = DictSearch()
-    oper = DictSearch()
-    dpt = DictSearch()
-    brand = DictSearch()
-    model = DictSearch()
-    color = DictSearch()
-    kind = DictSearch()
-    body = DictSearch()
-    purpose = DictSearch()
-    fuel = DictSearch()
-    plate = DictSearch()
-    vehicle =DictSearch()
+    own = Ownership()
+    koatu = Koatu()
+    oper = Operations()
+    dpt = Departments()
+    brand = Brands()
+    model = Models()
+    color = Colors()
+    kind = Kinds()
+    body = Body()
+    purpose = Purpose()
+    fuel = Fuel()
+    plate = Plates()
+    vehicle =Vehicles()
     record = DictSearch()
 
     sql_own = """Insert into Ownership (id, owner) values  (%s, %s)"""
@@ -92,7 +93,7 @@ def fill_db(file_path):
         oper = oper.get_id(data.oper[0])
         dpt = dpt.get_id(data.dep[0])
         brand = brand.get_id(data.brand)
-        model = model.get_id((abs(brand.id), data.model))
+        model = model.get_id((abs(brand._id), data.model))
         color = color.get_id(data.color)
         kind = kind.get_id(data.kind)
         body = body.get_id(data.body)
@@ -100,52 +101,52 @@ def fill_db(file_path):
         fuel = fuel.get_id(data.fuel)
         plate = plate.get_id(data.plate)
         vehicle = vehicle.get_id(
-            (abs(brand.id), abs(model.id), abs(color.id), abs(kind.id), abs(body.id), abs(purpose.id),
-             abs(fuel.id), abs(plate.id), data.year, data.capacity, data.own_weight, data.total_weight))
+            (abs(brand._id), abs(model._id), abs(color._id), abs(kind._id), abs(body._id), abs(purpose._id),
+             abs(fuel._id), abs(plate._id), data.year, data.capacity, data.own_weight, data.total_weight))
 
-        if own.id < 0:
-            own_val.append(((abs(own.id), data.owner)))
+        if own._id < 0:
+            own_val.append(((abs(own._id), data.owner)))
             # db.add(Ownership(id=abs(own.id), owner=data.owner))
-        if koatu.id < 0:
-            koatu_val.append(((abs(koatu.id), data.koatu)))
+        if koatu._id < 0:
+            koatu_val.append(((abs(koatu._id), data.koatu)))
             # db.add(Koatu(id=abs(koatu.id), code=data.koatu))
-        if oper.id < 0:
-            oper_val.append(((abs(oper.id), data.oper[0], data.oper[1])))
+        if oper._id < 0:
+            oper_val.append(((abs(oper._id), data.oper[0], data.oper[1])))
             # db.add(Operations(id=abs(oper.id), oper_code=data.oper[0], oper_name=data.oper[1]))
-        if dpt.id < 0:
-            dpt_val.append(((abs(dpt.id), data.dep[0], data.dep[1])))
+        if dpt._id < 0:
+            dpt_val.append(((abs(dpt._id), data.dep[0], data.dep[1])))
             # db.add(Departments(id=abs(dpt.id), dep_code=data.dep[0], dep=data.dep[1]))
-        if brand.id < 0:
-            brand_val.append(((abs(brand.id), data.brand)))
+        if brand._id < 0:
+            brand_val.append(((abs(brand._id), data.brand)))
             # db.add(Brands(id=abs(brand.id), brand=data.brand))
-        if model.id < 0:
-            model_val.append(((abs(model.id), abs(brand.id), data.model)))
+        if model._id < 0:
+            model_val.append(((abs(model._id), abs(brand._id), data.model)))
             # db.add(Models(id=abs(model.id), brand_id=abs(brand.id), model=data.model))
-        if color.id < 0:
-            color_val.append(((abs(color.id), data.color)))
+        if color._id < 0:
+            color_val.append(((abs(color._id), data.color)))
             # db.add(Colors(id=abs(color.id), color=data.color))
-        if kind.id < 0:
-            kind_val.append(((abs(kind.id), data.kind)))
+        if kind._id < 0:
+            kind_val.append(((abs(kind._id), data.kind)))
             # db.add(Kinds(id=abs(kind.id), kind=data.kind))
-        if body.id < 0:
-            body_val.append(((abs(body.id), data.body)))
+        if body._id < 0:
+            body_val.append(((abs(body._id), data.body)))
             # db.add(Body(id=abs(body.id), body=data.body))
-        if purpose.id < 0:
-            purpose_val.append(((abs(purpose.id), data.purpose)))
+        if purpose._id < 0:
+            purpose_val.append(((abs(purpose._id), data.purpose)))
             # db.add(Purpose(id=abs(purpose.id), purpose=data.purpose))
-        if fuel.id < 0:
-            fuel_val.append(((abs(fuel.id), data.fuel)))
+        if fuel._id < 0:
+            fuel_val.append(((abs(fuel._id), data.fuel)))
             # db.add(Fuel(id=abs(fuel.id), fuel=data.fuel))
-        if plate.id < 0:
-            plate_val.append(((abs(plate.id), data.plate)))
+        if plate._id < 0:
+            plate_val.append(((abs(plate._id), data.plate)))
             # db.add(Plates(id=abs(plate.id), plate=data.plate))
 
-        if vehicle.id < 0:
-            vehicle_val.append(((abs(vehicle.id), abs(brand.id), abs(model.id), abs(color.id), abs(kind.id),
-                                         abs(body.id), abs(purpose.id), abs(fuel.id), abs(plate.id), data.year,
-                                         data.capacity, data.own_weight, data.total_weight)))
+        if vehicle._id < 0:
+            vehicle_val.append(((abs(vehicle._id), abs(brand._id), abs(model._id), abs(color._id), abs(kind._id),
+                                 abs(body._id), abs(purpose._id), abs(fuel._id), abs(plate._id), data.year,
+                                 data.capacity, data.own_weight, data.total_weight)))
 
-        rec_val.append(((abs(own.id), abs(koatu.id), abs(oper.id), abs(dpt.id), data.date)))
+        rec_val.append(((abs(own._id), abs(koatu._id), abs(oper._id), abs(dpt._id), data.date)))
 
 
         #     db.add(Vehicles(id=abs(vehicle.id), brand_id=abs(brand.id), model_id=abs(model.id), color_id=abs(color.id), kind_id=abs(kind.id), body_id=abs(body.id),
