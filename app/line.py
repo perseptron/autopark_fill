@@ -30,7 +30,7 @@ class Line:
         self.oper = (int(row[OPER_CODE].strip('"')), row[OPER_NAME].strip('"'))
         self.date = datetime.strptime(row[DATE].strip('"'), "%Y-%m-%d").date()
         self.dep = (int(row[DEP_CODE].strip('"')), row[DEP].strip('"'))
-        self.brand = row[BRAND].strip('"')
+        self.brand = row[BRAND].strip('"').split("  ")[0].strip(" ")
         self.model = row[MODEL].strip('"')
         self.year = int(row[YEAR].strip('"'))
         self.color = row[COLOR].strip('"')
@@ -42,8 +42,8 @@ class Line:
         own_weight = row[OWN_WEIGHT].strip('"')
         total_weight = row[TOTAL_WEIGHT].strip('"')
         self.capacity = int(capacity) if capacity and capacity != "NULL" else 0
-        self.own_weight = int(own_weight) if own_weight and own_weight != "NULL" else 0
-        self.total_weight = int(total_weight) if total_weight and total_weight != "NULL" else 0
+        self.own_weight = int(float(own_weight)) if own_weight and own_weight != "NULL" else 0
+        self.total_weight = int(float(total_weight)) if total_weight and total_weight != "NULL" else 0
         self.plate = row[PLATE].strip('"').strip(" ")
 
 
